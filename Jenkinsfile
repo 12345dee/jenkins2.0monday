@@ -5,53 +5,52 @@ pipeline {
         APP_NAME = "my-app"
         JAR_FILE = "target/my-app-1.0-SNAPSHOT.jar"
         PORT = "8080"
+        GIT_REPO = "https://github.com/12345dee/jenkins2.0monday.git"
+        APP_SERVER = "3.235.30.163" // if deploying remotely
+        SSH_USER = "ubuntu"
     }
 
     options {
         timestamps()
+        timeout(time: 30, unit: 'MINUTES')
     }
 
     stages {
 
         stage('Clone Code') {
             steps {
-                git branch: 'master',
-                url: 'https://github.com/12345dee/jenkins2.0monday.git'
+                echo "Cloning repository..."
+                git branch: 'master', url: "${GIT_REPO}"
             }
         }
 
-        stage('Build') {
+        stage('Build JAR') {
             steps {
+                echo "Building Maven package..."
                 sh 'mvn clean package'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                sh 'mvn test'
             }
         }
 
         stage('Stop Old App') {
             steps {
-                script {
-                    sh '''
-                    PID=$(lsof -t -i:${PORT}) || true
-                    if [ ! -z "$PID" ]; then
-                        echo "Stopping old app..."
-                        kill -9 $PID
-                    else
-                        echo "No app running"
-                    fi
-                    '''
-                }
+                echo "Stopping old app..."
+                // If deploying on the same Jenkins server
+                sh '''
+                PID=$(lsof -t -i:${PORT}) || true
+                if [ ! -z "$PID" ]; then
+                    echo "Stopping running app (PID $PID)"
+                    kill -9 $PID
+                else
+                    echo "No app running on port ${PORT}"
+                fi
+                '''
             }
         }
 
-        stage('Deploy') {
+        stage('Deploy New App') {
             steps {
+                echo "Deploying new JAR..."
                 sh '''
-                echo "Deploying new version..."
                 nohup java -jar ${JAR_FILE} > app.log 2>&1 &
                 '''
             }
@@ -59,6 +58,7 @@ pipeline {
 
         stage('Verify Deployment') {
             steps {
+                echo "Verifying deployment..."
                 script {
                     sleep 5
                     sh '''

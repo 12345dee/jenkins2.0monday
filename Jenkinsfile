@@ -15,8 +15,8 @@ pipeline {
 
         stage('Clone Code') {
             steps {
-                git branch: 'main',
-                url: 'https://github.com/YOUR_USERNAME/YOUR_REPO.git'
+                git branch: 'master',
+                url: 'https://github.com/12345dee/jenkins2.0monday.git'
             }
         }
 

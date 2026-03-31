@@ -9,6 +9,12 @@
     <artifactId>my-app</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <!-- ✅ ADD HERE -->
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+    </properties>
+
     <build>
         <plugins>
             <!-- Create executable JAR -->
